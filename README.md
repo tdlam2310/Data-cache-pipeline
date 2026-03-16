@@ -12,7 +12,7 @@
 1. Put your testbench in `src/tb/verilog/sanity`
 2. In `sim/behav/sanity/` directory, run the command `python3.12 setup_sim_dir.py "your-module-name"`.
 3. In the generated subfolder, fill out the `tb_"your-module-name".include` file with the necessary files.
-4. In the generated subfolder, run `make link` to create soft links to each file from "`my-test-name.include`".
+4. In the generated subfolder, run `make link` to create symbolic links to each file from `tb_"your-module-name".include`.
 5. In the generated subfolder, run `make xrun` to run the simulation and fix any errors it reports.
 6. When your simulation is successful, run `make simvision` to view the waveforms.
 7. In waveform debugging, use what you learned in the onboarding project to view the relevant signals. We recommend in your testbench using `$display()` or file I/O in systemverilog to print results so you don't need to always rely on viewing waveforms to check certain behavior.
@@ -23,7 +23,7 @@
 1. In the `src/tb/verilog/uvm` directory, run the command `python3.12 setup_tb_dir.py "your-module-name"`, for a quick uvm directory setup. Template files are also provided in the `src/tb/verilog/uvm/uvm_template` directory.
 2. In `sim/behav/uvm/` directory, run the command `python3.12 setup_sim_dir.py "your-module-name"`.
 3. In the generated subfolder, fill out the `tb_"your-module-name".include` file with the necessary files.
-4. In the generated subfolder, run `make link` to create soft links to each file from `tb_"your-module-name".include`.
+4. In the generated subfolder, run `make link` to create symbolic links to each file from `tb_"your-module-name".include`.
 5. In the generated subfolder, run `make xrun` to run the simulation and fix any errors it reports.
 6. When your simulation is successful, run `make simvision` to view the waveforms.
 7. In waveform debugging, use what you learned in the onboarding project to view the relevant signals. We recommend in your testbench using `$display()` or file I/O in systemverilog to print results so you don't need to always rely on viewing waveforms to check certain behavior.
