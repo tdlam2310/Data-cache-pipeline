@@ -1,0 +1,33 @@
+// ========== INTERFACES ===========
+// ADD INTERFACES HERE
+../../../../src/
+
+// ========= SOURCE FILES ==========
+// ADD RTL FILES HERE
+../../../../src/rtl/
+
+// ========= UVM PACKAGE FILES =========
+// ADD UVM PACKAGE FILES HERE
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/sequences/MODULE_NAME_PLACEHOLDER_seq_pkg.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/agent/MODULE_NAME_PLACEHOLDER_agent_pkg.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/env/MODULE_NAME_PLACEHOLDER_env_pkg.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/tests/MODULE_NAME_PLACEHOLDER_test_pkg.sv
+
+// ========= UVM TB COMPONENTS ===========
+// ADD UVM COMPONENTS HERE
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/sequences/MODULE_NAME_PLACEHOLDER_seq_item.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/sequences/MODULE_NAME_PLACEHOLDER_sequence.svh
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/sequences/MODULE_NAME_PLACEHOLDER_seq_lib.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/agent/MODULE_NAME_PLACEHOLDER_sequencer.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/agent/MODULE_NAME_PLACEHOLDER_driver.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/agent/MODULE_NAME_PLACEHOLDER_monitor.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/agent/MODULE_NAME_PLACEHOLDER_agent.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/env/MODULE_NAME_PLACEHOLDER_sb.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/env/MODULE_NAME_PLACEHOLDER_env.sv
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/tests/MODULE_NAME_PLACEHOLDER_base_test.svh
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/tests/MODULE_NAME_PLACEHOLDER_test_lib.sv
+
+// ========= TB TOP ===========
+// ADD TB TOP AND ANY OTHER NEEDED COMPILE FILES HERE
+../../../../src/tb/verilog/uvm/MODULE_NAME_PLACEHOLDER/tb/MODULE_NAME_PLACEHOLDER_tb_top.sv
+

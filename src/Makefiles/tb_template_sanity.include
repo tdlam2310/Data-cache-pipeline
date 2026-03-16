@@ -1,0 +1,14 @@
+// ========== PACKAGES ===========
+// ADD PACKAGES HERE
+../../../../src/
+
+// ========= SOURCE FILES ==========
+// ADD RTL FILES HERE
+../../../../src/rtl/
+
+// ========= TESTBENCH ==========
+// ADD TESTBENCH HERE
+../../../../src/tb/sanity/
+
+
+

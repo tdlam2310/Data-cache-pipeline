@@ -8,16 +8,24 @@
 * Resources: [here](https://gtvault.sharepoint.com/:f:/s/SiliconJackets/EtAjUBo8IBJNjFa6UVnacHoBZXlPSJcx-Ai2KHaIHru66A?e=DSx60l)
 * Helpful for learning HDL: [here](https://hdlbits.01xz.net/wiki/Main_Page)
 
-# How to simulate your module (SANITY/NON-UVM)
-1. Put your testbench in `sim/behav/Tests/sanity`
-2. In `sim/behav/Include/` directory, create a `my-test-name.include` file.
-3. `my-test-name.include`, on each line put a relative path from `sim/behav` to each file you need for your simulation.
-    (i.e. interfaces, packages, source files, and a testbench). Note: put packages first, then interfaces, then source files.
-4. `cd` into `sim/behav`.
-5. In `sim/behav/Makefile`, set `INCLUDE_FILE_NAME` equal to your include file name `my-test-name.include`
-6. Run `make link` to create soft links in `sim/behav` to each file from "`my-test-name.include`".
-7. Run `make xrun` to run the simulation and fix any errors it reports.
-8. When your simulation is successful, run `make simvision` to view the waveforms.
-9. In waveform debugging, use what you learned in the onboarding project to view the relevant signals. We recommend in your testbench using `$display()` or file I/O in systemverilog to print results so you don't need to always rely on viewing waveforms to check certain behavior.
-10. `make clean` deletes files produced during simulation. Usually not necessary to use this.
-11. Note: If you change your code while simvision is open, you DON'T need to close simvision! Just run `make xrun` to rerun the simulation, and in simvision click File -> Reload Databases to update your waveform.
+# How to simulate your module (FOR DESIGNERS: SANITY/NON-UVM)
+1. Put your testbench in `src/tb/verilog/sanity`
+2. In `sim/behav/sanity/` directory, run the command `python3.12 setup_sim_dir.py "your-module-name"`.
+3. In the generated subfolder, fill out the `tb_"your-module-name".include` file with the necessary files.
+4. In the generated subfolder, run `make link` to create soft links to each file from "`my-test-name.include`".
+5. In the generated subfolder, run `make xrun` to run the simulation and fix any errors it reports.
+6. When your simulation is successful, run `make simvision` to view the waveforms.
+7. In waveform debugging, use what you learned in the onboarding project to view the relevant signals. We recommend in your testbench using `$display()` or file I/O in systemverilog to print results so you don't need to always rely on viewing waveforms to check certain behavior.
+8. `make clean` deletes files produced during simulation. Usually not necessary to use this.
+9. Note: If you change your code while simvision is open, you DON'T need to close simvision! Just run `make xrun` to rerun the simulation, and in simvision click File -> Reload Databases to update your waveform.
+
+# How to simulate your module (FOR VERIF: UVM)
+1. In the `src/tb/verilog/uvm` directory, run the command `python3.12 setup_tb_dir.py "your-module-name"`, for a quick uvm directory setup. Template files are also provided in the `src/tb/verilog/uvm/uvm_template` directory.
+2. In `sim/behav/uvm/` directory, run the command `python3.12 setup_sim_dir.py "your-module-name"`.
+3. In the generated subfolder, fill out the `tb_"your-module-name".include` file with the necessary files.
+4. In the generated subfolder, run `make link` to create soft links to each file from `tb_"your-module-name".include`.
+5. In the generated subfolder, run `make xrun` to run the simulation and fix any errors it reports.
+6. When your simulation is successful, run `make simvision` to view the waveforms.
+7. In waveform debugging, use what you learned in the onboarding project to view the relevant signals. We recommend in your testbench using `$display()` or file I/O in systemverilog to print results so you don't need to always rely on viewing waveforms to check certain behavior.
+8. `make clean` deletes files produced during simulation. Usually not necessary to use this.
+9. Note: If you change your code while simvision is open, you DON'T need to close simvision! Just run `make xrun` to rerun the simulation, and in simvision click File -> Reload Databases to update your waveform.

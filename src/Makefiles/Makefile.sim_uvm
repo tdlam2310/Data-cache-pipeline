@@ -1,0 +1,99 @@
+#--------------------------------------------------------------------
+# Makefile for UVM Simulation (sim/behav/uvm workspace)
+# - Creates symlinks to all src files
+# - Runs Cadence Xcelium / SimVision with UVM
+#
+# USAGE:
+# 1. make link
+# 2. make xrun
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Don't forget to add the following to your testbench
+#
+# initial begin
+#     $shm_open("waves.shm");
+#     $shm_probe("AC");
+# end
+#--------------------------------------------------------------------
+
+# ===== User-configurable knobs =====================================
+INCLUDE_FILE_NAME        	?= tb_MODULE_NAME_PLACEHOLDER.include
+TOPLEVEL					?= MODULE_NAME_PLACEHOLDER_tb_top
+UVM_TESTNAME				?= TESTNAME_PLACEHOLDER
+UVM_MAX_QUIT    			?= 1
+UVM_VERBOSITY   			?= UVM_FULL
+
+# ===== Paths =======================================================
+CURRENT_DIR := $(shell pwd)
+WORKSPACE   := $(CURRENT_DIR)/WORKSPACE
+VERILOG_DEFINES := SIM=1
+
+# ===== Help Message ================================================
+.PHONY: help
+help:
+	@echo "----------------------------------------------------------------"
+	@echo "Administrative targets:"
+	@echo "  help               - this message"
+	@echo "  clean              - remove WORKSPACE directory"
+	@echo
+	@echo "Compilation targets:"
+	@echo "  link               - generate WORKSPACE/sym_links/"
+	@echo "  xrun               - compile & simulate using Cadence Xcelium"
+	@echo "  simvision          - view waveform database"
+	@echo "  run_and_view       - xrun + simvision"
+	@echo "  coverage           - open coverage in IMC"
+	@echo "----------------------------------------------------------------"
+
+# ===== Administrative Targets ======================================
+.PHONY: clean link
+clean:
+	@rm -rf $(WORKSPACE)
+
+link:
+	@mkdir -p $(WORKSPACE)/sym_links
+	@rm -rf $(WORKSPACE)/sym_links/*
+	@python3.12 link_files_uvm.py $(INCLUDE_FILE_NAME)
+
+# ===== Tool setup ==================================================
+XRUN_FLAGS = -64bit -sv -linedebug -access +rwc \
+             -timescale 1ns/10ps \
+             +incdir+sym_links \
+			 -f $(WORKSPACE)/compile.f \
+             -coverage all \
+             -licqueue \
+             -covoverwrite
+
+UVMHOME ?=
+ifeq ($(strip $(UVMHOME)),)
+  UVM_SWITCH := -uvm
+else
+  UVM_SWITCH := -uvmhome $(UVMHOME)
+endif
+
+UVM_PLUSARGS = \
+  +UVM_MAX_QUIT_COUNT=$(UVM_MAX_QUIT) \
+  +UVM_TESTNAME=$(UVM_TESTNAME) \
+  +UVM_VERBOSITY=$(UVM_VERBOSITY) \
+  +define+$(VERILOG_DEFINES)
+
+# ===== Simulation targets ==========================================
+.PHONY: xrun simvision run_and_view coverage
+
+xrun: link
+	cd $(WORKSPACE) && \
+	xrun $(UVM_SWITCH) $(XRUN_FLAGS) \
+	     $(UVM_PLUSARGS) \
+		 -top $(TOPLEVEL) \
+	     -logfile simulation.log
+
+simvision:
+	cd $(WORKSPACE) && simvision waves.shm &
+
+run_and_view: xrun simvision
+
+coverage:
+	cd $(WORKSPACE) && /tools/software/cadence/vmanager/25.09.020/tools.lnx86/vmgr/bin/imc -load cov_work/scope/test &
+
+# ===== Default Target ==============================================
+.DEFAULT_GOAL := run_and_view

@@ -7,7 +7,7 @@ if len(sys.argv) != 2:
     sys.exit(1)
 
 # Input and output file names
-input_file = "Include/" + sys.argv[1]
+input_file = "./" + sys.argv[1]
 print("looking in file " + input_file)
 
 # Ensure WORKSPACE and sym_links directories exist

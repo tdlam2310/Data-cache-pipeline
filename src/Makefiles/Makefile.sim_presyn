@@ -1,0 +1,77 @@
+#--------------------------------------------------------------------
+# Makefile for Presyn Simulation (sim/behav/sanity workspace)
+# - Creates symlinks to all src files
+# - Runs Cadence Xcelium / SimVision / IMC
+#
+# USAGE:
+# 1. make link
+# 2. make xrun
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# Don't forget to add the following to your testbench
+#
+# initial begin
+#     $shm_open("waves.shm");
+#     $shm_probe("AC");
+# end
+#--------------------------------------------------------------------
+
+# ===== User‑configurable variables =================================
+INCLUDE_FILE_NAME ?= tb_MODULE_NAME_PLACEHOLDER.include
+
+# ===== Paths =======================================================
+CURRENT_DIR := $(shell pwd)
+WORKSPACE   := $(CURRENT_DIR)/WORKSPACE
+VERILOG_DEFINES := SIM=1
+
+# ===== Help Message ================================================
+.PHONY: help
+help:
+	@echo "----------------------------------------------------------------"
+	@echo "Administrative targets:"
+	@echo "  help               - this message"
+	@echo "  clean              - remove WORKSPACE directory"
+	@echo
+	@echo "Compilation targets:"
+	@echo "  link               - generate WORKSPACE/sym_links/"
+	@echo "  xrun               - compile & simulate using Cadence Xcelium"
+	@echo "  simvision          - view waveform database"
+	@echo "  run_and_view       - xrun + simvision"
+	@echo "  coverage           - open coverage in IMC"
+	@echo "----------------------------------------------------------------"
+
+# ===== Administrative Targets ======================================
+.PHONY: clean link
+clean:
+	@rm -rf $(WORKSPACE)
+
+link:
+	@mkdir -p $(WORKSPACE)/sym_links
+	@rm -rf $(WORKSPACE)/sym_links/*
+	@python3.12 link_files.py $(INCLUDE_FILE_NAME)
+
+# ===== Simulation Targets ==========================================
+.PHONY: xrun simvision run_and_view coverage
+XRUN_FLAGS = -64bit -sv -linedebug -access +rwc \
+             -timescale 1ns/10ps \
+             +incdir+sym_links \
+             -coverage all \
+             -licqueue \
+             -covoverwrite
+
+xrun: link
+	cd $(WORKSPACE) && \
+	xrun $(XRUN_FLAGS) -f sym_links/sim_no_path.include \
+	     -logfile simulation.log
+
+simvision:
+	cd $(WORKSPACE) && simvision waves.shm &
+
+run_and_view: xrun simvision
+
+coverage:
+	cd $(WORKSPACE) && /tools/software/cadence/vmanager/25.09.020/tools.lnx86/vmgr/bin/imc -load cov_work/scope/test &
+
+# ===== Default Target ==============================================
+.DEFAULT_GOAL := run_and_view
