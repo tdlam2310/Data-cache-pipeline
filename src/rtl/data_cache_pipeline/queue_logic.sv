@@ -1,6 +1,6 @@
 import param_pkg::*;
 module queue_logic(
-    input logic clk,
+    input logic clk, rst,
     input logic incoming_hit_miss,
     input logic [INSTR_ADDR_WIDTH-1:0] incoming_instr_addr,
     input logic [DATA_ADDR_WIDTH-1:0] incoming_data_addr,
@@ -8,7 +8,9 @@ module queue_logic(
     input logic [DATA_WIDTH-1:0] incoming_data,
     input logic incoming_valid,
     input logic [TAG_WIDTH-1:0] incoming_evicted_tag,
-    input logic [CACHE_LINE_WIDTH-1:0] incoming_evicted_line
+    input logic [CACHE_LINE_WIDTH-1:0] incoming_evicted_line,
+    input logic first_entry_complete,
+    output logic queue_full
 );
     typedef struct {
         logic hit_miss; // 1 if hit, 0 if miss
@@ -25,11 +27,19 @@ module queue_logic(
     queue_entry_t queue[QUEUE_LENGTH];
     queue_entry_t queue_next[QUEUE_LENGTH];
 
-    logic [$clog2(QUEUE_LENGTH)-1:0] last_entry_idx;
-    logic [$clog2(QUEUE_LENGTH)-1:0] last_entry_idx_next;
+    logic [$clog2(QUEUE_LENGTH)-1:0] last_idx;
+    logic [$clog2(QUEUE_LENGTH)-1:0] last_idx_next;
+
+    logic first_entry_miss;
+    logic first_entry_addr_index [INDEX_WIDTH - 1:0];
 
     always_ff @(posedge clk) begin
-        for (int i = 0; i <= last_entry_idx; i += 1) begin
+        if (rst) begin
+            last_idx <= 0;
+        end else begin
+            last_idx <= last_idx_next;
+        end
+        for (int i = 0; i <= last_idx; i += 1) begin
             queue[i].hit_miss <= queue_next[i].hit_miss;
             queue[i].instr_addr <= queue_next[i].instr_addr;
             queue[i].data_addr <= queue_next[i].data_addr;
@@ -40,33 +50,52 @@ module queue_logic(
             queue[i].evicted_tag <= queue_next[i].evicted_tag;
             queue[i].evicted_line <= queue_next[i].evicted_line;
         end
-        last_entry_idx <= last_entry_idx_next;
     end
 
     always_comb begin
-        // Only if move up
-        for (int i = 0; i <= last_entry_idx; i += 1) begin
-            queue_next[i].hit_miss = queue[i + 1].hit_miss;
-            queue_next[i].instr_addr = queue[i + 1].instr_addr;
-            queue_next[i].data_addr = queue[i + 1].data_addr;
-            queue_next[i].wr_rd = queue[i + 1].wr_rd;
-            queue_next[i].data = queue[i + 1].data;
-            queue_next[i].valid = queue[i + 1].valid;
-            queue_next[i].complete = queue[i + 1].complete;
-            queue_next[i].evicted_tag = queue[i + 1].evicted_tag;
-            queue_next[i].evicted_line = queue[i + 1].evicted_line;
+        queue_full = 0;
+        first_entry_miss = 0;
+        first_entry_addr_index = 0;
+
+        // Move up if first entry completes
+        if (first_entry_complete) begin
+            first_entry_miss = !queue[0].hit_miss;
+            first_entry_addr_index = queue[0].data_addr[OFFSET_WIDTH + INDEX_WIDTH - 1: OFFSET_WIDTH];
+            
+            for (int i = 0; i <= last_idx; i += 1) begin
+                if (first_entry_miss && queue[i + 1].data_addr[OFFSET_WIDTH + INDEX_WIDTH - 1: OFFSET_WIDTH] == first_entry_addr_index) begin
+                    queue_next[i].hit_miss = !queue[i + 1].hit_miss;
+                end else begin
+                    queue_next[i].hit_miss = queue[i + 1].hit_miss;
+                end
+
+                queue_next[i].instr_addr = queue[i + 1].instr_addr;
+                queue_next[i].data_addr = queue[i + 1].data_addr;
+                queue_next[i].wr_rd = queue[i + 1].wr_rd;
+                queue_next[i].data = queue[i + 1].data;
+                queue_next[i].valid = queue[i + 1].valid;
+                queue_next[i].complete = queue[i + 1].complete;
+                queue_next[i].evicted_tag = queue[i + 1].evicted_tag;
+                queue_next[i].evicted_line = queue[i + 1].evicted_line;
+            end
         end
 
-        // Only if add new entry
-        last_entry_idx_next = last_entry_idx + 1;
-        queue_next[last_entry_idx_next].hit_miss = incoming_hit_miss;
-        queue_next[last_entry_idx_next].instr_addr = incoming_instr_addr;
-        queue_next[last_entry_idx_next].data_addr = incoming_data_addr;
-        queue_next[last_entry_idx_next].wr_rd = incoming_wr_rd;
-        queue_next[last_entry_idx_next].data = incoming_data;
-        queue_next[last_entry_idx_next].valid = incoming_valid;
-        queue_next[last_entry_idx_next].complete = 0;
-        queue_next[last_entry_idx_next].evicted_tag = incoming_evicted_tag;
-        queue_next[last_entry_idx_next].evicted_line = incoming_evicted_line;
+        if (last_idx + 1 < QUEUE_LENGTH) begin // If able to add new entry
+            if (/*input actually has new entry*/1) begin
+                last_idx_next = last_idx + 1;
+                queue_next[last_idx_next].hit_miss = incoming_hit_miss;
+                queue_next[last_idx_next].instr_addr = incoming_instr_addr;
+                queue_next[last_idx_next].data_addr = incoming_data_addr;
+                queue_next[last_idx_next].wr_rd = incoming_wr_rd;
+                queue_next[last_idx_next].data = incoming_data;
+                queue_next[last_idx_next].valid = incoming_valid;
+                queue_next[last_idx_next].complete = 0;
+                queue_next[last_idx_next].evicted_tag = incoming_evicted_tag;
+                queue_next[last_idx_next].evicted_line = incoming_evicted_line;
+            end
+        end else begin // Generate stall signal
+            last_idx_next = last_idx;
+            queue_full = 1;
+        end
     end
 endmodule
