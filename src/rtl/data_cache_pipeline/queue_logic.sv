@@ -30,7 +30,6 @@ module queue_logic(
     logic [$clog2(QUEUE_LENGTH)-1:0] last_idx;
     logic [$clog2(QUEUE_LENGTH)-1:0] last_idx_next;
 
-    logic first_entry_miss;
     logic first_entry_addr [DATA_ADDR_WIDTH - 1:0];
 
     always_ff @(posedge clk) begin
@@ -54,16 +53,17 @@ module queue_logic(
 
     always_comb begin
         queue_full = 0;
-        first_entry_miss = !queue[0].hit_miss;
         first_entry_addr = queue[0].data_addr;
 
         // Move up if first entry completes
         if (first_entry_complete) begin
             for (int i = 0; i <= last_idx; i += 1) begin
 
-                if (first_entry_miss && queue[i + 1].data_addr[TAG_BASE - 1:INDEX_BASE] == first_entry_addr[TAG_BASE - 1:INDEX_BASE]) begin // If miss in first entry and match index (same cache line)
-                    queue_next[i].hit_miss = (queue[i + 1].data_addr[DATA_ADDR_WIDTH - 1:TAG_BASE] == first_entry_addr[DATA_ADDR_WIDTH - 1:TAG_BASE]); // If match tag, update to hit; if not match tag, update to miss
-                end else begin // If hit or index mismatch (different cache lines), no special influence
+                if ((!queue[0].hit_miss) && (queue[i + 1].data_addr[TAG_BASE - 1:INDEX_BASE] == first_entry_addr[TAG_BASE - 1:INDEX_BASE])) begin // If first entry miss and index match (same cache line)
+                    // If tag match, update current entry as hit
+                    // If tag mismatch, update current entry as miss
+                    queue_next[i].hit_miss = (queue[i + 1].data_addr[DATA_ADDR_WIDTH - 1:TAG_BASE] == first_entry_addr[DATA_ADDR_WIDTH - 1:TAG_BASE]);
+                end else begin // If first entry hit or index mismatch (different cache lines), no special influence on current entry's hit/miss
                     queue_next[i].hit_miss = queue[i + 1].hit_miss;
                 end
 
