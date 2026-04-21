@@ -36,9 +36,9 @@ module data_cache_pipeline(
     logic [TAG_WIDTH-1:0] cache_line_from_tag_array;
 
     always_comb begin
-        offset = data_addr[OFFSET_WIDTH-1:0];
-        index = data_addr[OFFSET_WIDTH+INDEX_WIDTH-1 :OFFSET_WIDTH];
-        tag = data_addr[DATA_ADDR_WIDTH-1:OFFSET_WIDTH+INDEX_WIDTH];
+        offset = data_addr[INDEX_BASE - 1:0];
+        index = data_addr[TAG_BASE - 1:INDEX_BASE];
+        tag = data_addr[DATA_ADDR_WIDTH - 1:TAG_BASE];
     end
     
     sky130_sram_4kbytes_1rw1r_128x256_8 data_array(
