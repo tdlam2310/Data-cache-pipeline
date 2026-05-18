@@ -37,9 +37,7 @@ Stage 1 only makes progress while we're in `S_IDLE` and ready for the next reque
 
 The straightforward way to handle a dirty miss is: write the old line back to memory, then fetch the new one. That's two serial trips across a slow memory bus, and the LSU is stuck waiting for both.
 
-Instead, dirty evictions go into a 2-entry write buffer in the cache. The fetch starts *immediately*; the writeback drains to memory in the background, opportunistically, whenever the memory bus isn't being used for something more urgent. Most of the time the writeback completes during `S_REFILL` — the SRAM is busy installing the new line via port 0 while the memory bus is busy sending the old line out. Different hardware, same cycle, no conflict.
-
-I ended up using a bitmap-indexed buffer rather than a strict FIFO. Strict ordering didn't matter for correctness (writes to different addresses don't depend on each other in a single-threaded design), and dropping the head/tail pointers made the forwarding logic cleaner. Three small priority encoders pick the slot to push into, the slot to drain, and the slot to forward from.
+Instead, dirty evictions go into a 2-entry write buffer in the cache. The fetch starts *immediately*; the writeback drains to memory in the background, opportunistically, whenever the memory bus isn't being used for something more urgent. Most of the time the writeback completes during `S_REFILL` — the SRAM is busy installing the new line via port 0 while the memory bus is busy sending the old line out. Different hardware, same cycle, no conflict. Three small priority encoders pick the slot to push into, the slot to drain, and the slot to forward from.
 
 ## Forwarding
 
