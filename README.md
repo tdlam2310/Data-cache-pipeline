@@ -68,7 +68,4 @@ A worst-case "re-access an evicted line" pattern goes from `2 + M` cycles to `3`
 - `cache_pkg.sv` — parameters, `tag_entry_t` struct, R/W constants
 - `data_cache_pipeline.sv` — full pipeline: stage 1, PRF1, stage 2, FSM, WB, forwarding, SRAM instantiations
 
-## Status
-
-Blocking version with write buffer and forwarding — complete, simulatable. Non-blocking queue is under separate development and plugs in at `NON_BLOCKING_HOOK` points.
 
