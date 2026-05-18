@@ -77,7 +77,3 @@ Write hits also cost an extra stall cycle that a small store-bypass buffer could
 
 - `cache_pkg.sv` — parameters, the `tag_entry_t` struct, R/W constants
 - `data_cache_pipeline.sv` — the actual pipeline module: stage 1, PRF1, stage 2, FSM, write buffer, forwarding, SRAM instantiations
-
-## Team
-
-Part of SiliconJackets Tapeout 3 at Georgia Tech. I worked on the pipeline and write buffer; Hongyun handled miss and main memory access, Trung worked on stall logic, Lilian and Tu built the queue and comparator that turns this into the non-blocking version.
