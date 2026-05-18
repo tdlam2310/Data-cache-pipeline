@@ -67,12 +67,6 @@ The worst-case "evict a line, then immediately need it back" pattern (which woul
 - **Tag SRAM `wmask` is hardcoded to `4'hF`.** Tag entries are always rewritten as a whole word — there's no scenario where you'd want to update only part of a tag — so partial masking is pointless.
 - **The data and tag SRAMs are accessed in parallel** every cycle, which means stage 1 reads both before stage 2 even knows whether it's a hit. Slightly wasteful on misses, but it keeps the critical path short and is the standard tradeoff.
 
-## What's not in here yet
-
-The cache is blocking — one miss at a time. The non-blocking version from our team's design has a request queue with Complete and Dependency columns and a comparator that flips hit/miss bits when refills land. That's a separate module my teammates are building. Every spot in my code where it would plug in is marked with a `NON_BLOCKING_HOOK` comment.
-
-Write hits also cost an extra stall cycle that a small store-bypass buffer could eliminate. Didn't end up implementing that — it would complicate the SRAM port arbitration and the win is modest.
-
 ## Files
 
 - `cache_pkg.sv` — parameters, the `tag_entry_t` struct, R/W constants
